@@ -4,7 +4,10 @@ import Login from "./pages/Login";
 import TaskForm from "./pages/TaskForm";
 import Profile from "./pages/Profile";
 import Register from "./pages/Register";
-import Dashboard from "./pages/Dashboard";
+import MoneyPot from "./pages/MoneyPot";
+import Leaderboard from "./pages/Leaderboard";
+import Analytics from "./pages/Analytics";
+
 
 function App() {
   return (
@@ -14,7 +17,10 @@ function App() {
       <Route path="/task" element={<TaskForm />} />
       <Route path="/profile" element={<Profile />} />
       <Route path="/register" element={<Register />} />
-      <Route path="/dashboard" element={<Dashboard />} />
+    <Route path="/money-pot" element={<MoneyPot />} />
+    <Route path="/leaderboard" element={<Leaderboard />} />
+<Route path="/analytics" element={<Analytics userId={localStorage.getItem("user_id") || ""} />} />
+      
     </Routes>
   );
 }

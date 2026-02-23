@@ -1,7 +1,12 @@
 flask
 flask-cors
-pymongo
+pymongo[srv]
 python-dotenv
 bcrypt
 pyjwt
 apscheduler
+flask-apscheduler
+twilio
+pytz
+requests
+gunicorn
