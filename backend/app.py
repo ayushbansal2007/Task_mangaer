@@ -18,9 +18,14 @@ app = Flask(__name__)
 # Origins mein "*" isliye taaki Vercel ka random URL block na ho
 CORS(app, resources={
     r"/*": {
-        "origins": "*", 
+        "origins": [
+            "https://task-mangaer-gray.vercel.app",
+            "https://task-mangaer-git-main-ayushbansal2007s-projects.vercel.app"
+        ],
         "methods": ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
-        "allow_headers": ["Content-Type", "Authorization"]
+        "allow_headers": ["Content-Type", "Authorization"],
+        "expose_headers": ["Content-Type", "Authorization"],
+        "supports_credentials": True
     }
 })
 
