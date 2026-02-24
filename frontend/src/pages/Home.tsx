@@ -2,25 +2,30 @@ import Navbar from "../components/Navbar";
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { getUserId } from "../utils/auth";
+// Faltu icons hata diye hain taki build fail na ho
 import { 
-  Rocket, Trophy, Bell, Zap, ArrowRight, Star, 
-  CheckCircle, Users, Flame, Calendar, Smartphone 
+  Rocket, Trophy, Zap, ArrowRight, 
+  Flame, Calendar, Smartphone 
 } from "lucide-react";
 
 function Home() {
   const navigate = useNavigate();
   const userId = getUserId();
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [profileComplete, setProfileComplete] = useState(true);
 
   useEffect(() => {
     if (!userId) return;
-    fetch(`http://127.0.0.1:5000/profile/${userId}`)
+    // Localhost ki jagah Environment Variable use kiya
+    const API_URL = import.meta.env.VITE_API_URL;
+    fetch(`${API_URL}/profile/${userId}`)
       .then(res => res.json())
       .then(data => {
         if (!data.city || !data.state || !data.goal) {
           setProfileComplete(false);
         }
-      });
+      })
+      .catch(err => console.error("Backend connection error:", err));
   }, [userId]);
 
   return (
@@ -119,7 +124,7 @@ function Home() {
             onClick={() => navigate("/task")}
             className="mt-10 bg-white text-indigo-600 px-10 py-4 rounded-2xl font-black text-lg hover:scale-105 transition-transform shadow-xl"
           >
-            Create Your First Task 🚀
+            Create Your First Task <Rocket size={20} className="inline ml-1" />
           </button>
         </div>
       </div>
