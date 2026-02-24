@@ -1,6 +1,6 @@
 import pytz
-import os # <--- Import os zaroori hai
-from flask import Flask, request, jsonify
+import os
+from flask import Flask, request, jsonify, make_response
 from flask_cors import CORS
 from flask_apscheduler import APScheduler
 from datetime import datetime, timedelta
@@ -14,20 +14,27 @@ from services.whatsapp_service import send_whatsapp_reminder
 
 app = Flask(__name__)
 
-# --- CORS CONFIGURATION (Updated for Deployment) ---
-# Origins mein "*" isliye taaki Vercel ka random URL block na ho
-CORS(app, resources={
-    r"/*": {
-        "origins": [
-            "https://task-mangaer-gray.vercel.app",
-            "https://task-mangaer-git-main-ayushbansal2007s-projects.vercel.app"
-        ],
-        "methods": ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
-        "allow_headers": ["Content-Type", "Authorization"],
-        "expose_headers": ["Content-Type", "Authorization"],
-        "supports_credentials": True
-    }
-})
+# --- 1. GLOBAL CORS CONFIGURATION ---
+# "origins": "*" sabse safe hai jab tak testing chal rahi hai
+CORS(app, resources={r"/*": {"origins": "*"}}, supports_credentials=True)
+
+# --- 2. THE NUCLEAR PREFLIGHT FIX ---
+# Ye har request se pehle check karega aur CORS headers zabardasti add karega
+@app.before_request
+def handle_preflight():
+    if request.method == "OPTIONS":
+        response = make_response()
+        response.headers.add("Access-Control-Allow-Origin", "*")
+        response.headers.add("Access-Control-Allow-Headers", "Content-Type,Authorization")
+        response.headers.add("Access-Control-Allow-Methods", "GET,POST,PUT,DELETE,OPTIONS")
+        return response
+@app.after_request
+def add_cors_headers(response):
+    response.headers.add("Access-Control-Allow-Origin", "*")
+    response.headers.add("Access-Control-Allow-Headers", "Content-Type,Authorization")
+    response.headers.add("Access-Control-Allow-Methods", "GET,POST,PUT,DELETE,OPTIONS")
+    response.headers.add("Access-Control-Allow-Credentials", "true")
+    return response
 
 # --- SMART SCHEDULER LOGIC ---
 scheduler = APScheduler()
@@ -74,6 +81,5 @@ if __name__ == "__main__":
     scheduler.init_app(app)
     scheduler.start()
     
-    # --- PORT CONFIGURATION (Render ke liye zaroori) ---
     port = int(os.environ.get("PORT", 5000))
     app.run(host='0.0.0.0', port=port, debug=False, use_reloader=False)
