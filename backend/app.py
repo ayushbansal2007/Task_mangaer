@@ -15,26 +15,8 @@ from services.whatsapp_service import send_whatsapp_reminder
 app = Flask(__name__)
 
 # --- 1. GLOBAL CORS CONFIGURATION ---
-# "origins": "*" sabse safe hai jab tak testing chal rahi hai
+# Ye line akele kafi hai saare CORS issues handle karne ke liye
 CORS(app, resources={r"/*": {"origins": "*"}}, supports_credentials=True)
-
-# --- 2. THE NUCLEAR PREFLIGHT FIX ---
-# Ye har request se pehle check karega aur CORS headers zabardasti add karega
-@app.before_request
-def handle_preflight():
-    if request.method == "OPTIONS":
-        response = make_response()
-        response.headers.add("Access-Control-Allow-Origin", "*")
-        response.headers.add("Access-Control-Allow-Headers", "Content-Type,Authorization")
-        response.headers.add("Access-Control-Allow-Methods", "GET,POST,PUT,DELETE,OPTIONS")
-        return response
-@app.after_request
-def add_cors_headers(response):
-    response.headers.add("Access-Control-Allow-Origin", "*")
-    response.headers.add("Access-Control-Allow-Headers", "Content-Type,Authorization")
-    response.headers.add("Access-Control-Allow-Methods", "GET,POST,PUT,DELETE,OPTIONS")
-    response.headers.add("Access-Control-Allow-Credentials", "true")
-    return response
 
 # --- SMART SCHEDULER LOGIC ---
 scheduler = APScheduler()
@@ -82,4 +64,5 @@ if __name__ == "__main__":
     scheduler.start()
     
     port = int(os.environ.get("PORT", 5000))
+    # Local pe debug=True kar sakte ho, Render pe ye automatic handle ho jata hai
     app.run(host='0.0.0.0', port=port, debug=False, use_reloader=False)
