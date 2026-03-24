@@ -150,6 +150,7 @@ function Home() {
 
       {/* FOOTER */}
       <footer className="py-16 px-6 border-t border-slate-900 text-center">
+      <h1 className="text-3xl font-black text-white mb-4 italic">Powred by Ayush Bansal</h1>
         <div className="text-xl font-black text-white tracking-widest mb-8">HABITMASTER<span className="text-sky-500">.</span></div>
         <p className="text-slate-600 text-[10px] font-bold tracking-[0.3em] uppercase">Built for those who refuse to be average.</p>
       </footer>
