@@ -1,10 +1,13 @@
 import { useEffect, useState } from "react";
 import { getUserId } from "../utils/auth";
 import { 
-  User, CheckCircle2, Trophy, Trash2, Edit3, X, Sparkles, Plus 
+  User, CheckCircle2, Trophy, Trash2, Edit3, X, Sparkles 
 } from "lucide-react";
 
 const ALL_DAYS = ["monday", "tuesday", "wednesday", "thursday", "friday", "saturday", "sunday"];
+
+// ✅ Global API URL Fix: Ye line automatic handle karegi Local aur Live dono ko
+const API_URL = import.meta.env.VITE_API_URL || "http://localhost:5000";
 
 function Profile() {
   const userId = getUserId();
@@ -19,9 +22,10 @@ function Profile() {
   const fetchData = async () => {
     if (!userId) return;
     try {
+      // ✅ Localhost hataya, API_URL lagaya
       const [pRes, tRes] = await Promise.all([
-        fetch(`http://localhost:5000/profile/${userId}`, { cache: 'no-store' }),
-        fetch(`http://localhost:5000/tasks/${userId}`, { cache: 'no-store' })
+        fetch(`${API_URL}/profile/${userId}`, { cache: 'no-store' }),
+        fetch(`${API_URL}/tasks/${userId}`, { cache: 'no-store' })
       ]);
       if (pRes.ok) setProfile(await pRes.json());
       if (tRes.ok) setTasks(await tRes.json());
@@ -32,9 +36,8 @@ function Profile() {
 
   useEffect(() => { fetchData(); }, [userId]);
 
-  // --- COMPLETE TASK (Systumm Fix) ---
+  // --- COMPLETE TASK ---
   const handleComplete = async (taskId: string) => {
-    // 1. Backup lo aur UI se turant hatao (Optimistic Update)
     const previousTasks = [...tasks];
     const previousPoints = profile?.points || 0;
 
@@ -44,14 +47,14 @@ function Profile() {
     setTimeout(() => setPointsGlow(false), 1000);
 
     try {
-      const res = await fetch(`http://localhost:5000/tasks/complete/${taskId}`, {
+      // ✅ API_URL use kiya
+      const res = await fetch(`${API_URL}/tasks/complete/${taskId}`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ userId }) 
       });
 
       if (!res.ok) {
-        // Agar backend mana karde toh wapas le aao
         setTasks(previousTasks);
         setProfile((prev: any) => ({ ...prev, points: previousPoints }));
         alert("Panga ho gaya! Task update nahi ho paya.");
@@ -67,7 +70,8 @@ function Profile() {
   const handleDelete = async (taskId: string) => {
     if (!window.confirm("Bhai, pakka delete karna hai?")) return;
     try {
-      const res = await fetch(`http://localhost:5000/tasks/${taskId}`, { method: 'DELETE' });
+      // ✅ API_URL use kiya
+      const res = await fetch(`${API_URL}/tasks/${taskId}`, { method: 'DELETE' });
       if (res.ok) setTasks(tasks.filter(t => t._id !== taskId));
     } catch (err) { console.error(err); }
   };
@@ -75,7 +79,6 @@ function Profile() {
   // --- UPDATE TASK ---
   const handleUpdate = async () => {
     try {
-      const API_URL = import.meta.env.VITE_API_URL
       const res = await fetch(`${API_URL}/tasks/${editingTask._id}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
@@ -177,7 +180,7 @@ function Profile() {
         <div className="fixed inset-0 bg-[#020617]/95 backdrop-blur-sm flex items-center justify-center p-4 z-50">
           <div className="bg-slate-900 border border-slate-700 p-10 rounded-[3rem] w-full max-w-md shadow-2xl relative animate-in fade-in zoom-in duration-200">
             <button onClick={() => setIsEditing(false)} className="absolute top-8 right-8 text-slate-500 hover:text-white transition-colors"><X /></button>
-            <h2 className="text-3xl font-black mb-8 italic italic uppercase tracking-tighter">Edit Task</h2>
+            <h2 className="text-3xl font-black mb-8 italic uppercase tracking-tighter">Edit Task</h2>
             <div className="space-y-6">
               <div>
                 <label className="text-[10px] font-black text-slate-500 uppercase ml-2 mb-2 block tracking-widest">Task Name</label>
